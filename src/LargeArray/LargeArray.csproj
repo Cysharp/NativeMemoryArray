@@ -12,4 +12,8 @@
 		<PackageReference Include="System.Memory" Version="4.5.4" />
 	</ItemGroup>
 
+	<ItemGroup Condition="$(TargetFramework) != 'net6.0'" >
+		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
+	</ItemGroup>
+
 </Project>

@@ -7,7 +7,9 @@ namespace Cysharp.Collections
 {
     public sealed class LargeArray<T> : IBufferWriter<T>
     {
-        const int MaxArrayLength = 0X7FEFFFFF; // 0x7FFFFFC7;
+        // .NET 6 is 0x7FFFFFC7(Array.MaxLength)
+        // before, byte is 0x7FFFFFC7, others is 0X7FEFFFFF
+        const int MaxArrayLength = 0X7FEFFFFF;
 
         public static readonly LargeArray<T> Empty = new LargeArray<T>(0);
 
