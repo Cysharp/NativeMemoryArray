@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Cysharp.Collections
 {
@@ -115,8 +116,8 @@ namespace Cysharp.Collections
             // length...
             if (written == 0) return ReadOnlySequence<T>.Empty;
 
-            Segment lastSegment = null;
-            Segment nextSegment = null;
+            Segment? lastSegment = null;
+            Segment? nextSegment = null;
             // TODO:setup empty sequences.
 
 
@@ -142,12 +143,14 @@ namespace Cysharp.Collections
                 segment = segment.Next as Segment;
             }
 
-            return new ReadOnlySequence<T>(nextSegment, 0, lastSegment, lastSegment.Memory.Length);
+            Debug.Assert(nextSegment != null);
+            Debug.Assert(lastSegment != null);
+            return new ReadOnlySequence<T>(nextSegment, 0, lastSegment, lastSegment!.Memory.Length);
         }
 
         class Segment : ReadOnlySequenceSegment<T>
         {
-            public Segment(Memory<T> buffer, Segment nextSegment)
+            public Segment(Memory<T> buffer, Segment? nextSegment)
             {
                 Memory = buffer;
                 Next = nextSegment;

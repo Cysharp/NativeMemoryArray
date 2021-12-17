@@ -19,7 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\src\LargeArray\LargeArray\LargeArray.csproj" />
+	  <ProjectReference Include="..\..\src\LargeArray\LargeArray.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

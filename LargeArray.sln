@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9138598E-9FA3-4231-98F0-EBC4D54AC812}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LargeArray", "..\src\LargeArray\LargeArray\LargeArray.csproj", "{21F01F34-8DE0-448B-BE9F-D0E06D030C06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LargeArray", "src\LargeArray\LargeArray.csproj", "{21F01F34-8DE0-448B-BE9F-D0E06D030C06}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8E15400D-C0AD-428C-B425-1FE366264F71}"
 EndProject
