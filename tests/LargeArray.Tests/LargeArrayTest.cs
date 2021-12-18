@@ -9,7 +9,7 @@ namespace LargeArray.Tests
         {
             var array = new LargeArray<int>(1024, 100);
             array.Length.Should().Be(1024);
-            array.ToWrittenReadOnlySequence().Length.Should().Be(1024);
+            array.AsReadOnlySequence().Length.Should().Be(1024);
 
             // size hint standard
             var span = array.GetSpan(5);
@@ -20,7 +20,7 @@ namespace LargeArray.Tests
             span[4] = 95;
             array.Advance(5);
             array.Length.Should().Be(5);
-            array.ToWrittenReadOnlySequence().ToArray().Should().Equal(99, 98, 97, 96, 95);
+            array.AsReadOnlySequence().ToArray().Should().Equal(99, 98, 97, 96, 95);
 
             // size hint over chunk
             array.GetSpan(150);

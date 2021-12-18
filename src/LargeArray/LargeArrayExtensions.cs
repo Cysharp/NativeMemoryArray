@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -11,13 +12,14 @@ namespace Cysharp.Collections
         public static async Task CopyFromAsync(this LargeArray<byte> buffer, Stream stream, IProgress<int>? progress = null, CancellationToken cancellationToken = default)
         {
             int read;
-
             var memory = buffer.GetMemory();
             MemoryMarshal.TryGetArray((ReadOnlyMemory<byte>)memory, out var array);
             while ((read = await stream.ReadAsync(array.Array!, array.Offset, array.Count, cancellationToken).ConfigureAwait(false)) != 0)
             {
                 progress?.Report(read);
                 buffer.Advance(read);
+                memory = buffer.GetMemory();
+                MemoryMarshal.TryGetArray((ReadOnlyMemory<byte>)memory, out array);
             }
         }
 
@@ -38,5 +40,9 @@ namespace Cysharp.Collections
                 progress?.Report(item.Length);
             }
         }
+
+
+
+
     }
 }

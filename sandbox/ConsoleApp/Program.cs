@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Cysharp.Collections;
+using System.Runtime.InteropServices;
 
 
 
@@ -7,17 +8,11 @@ using Cysharp.Collections;
 
 
 var buffer = new HugeBuffer(104);
+//var buffer = new byte[10];
 
-var span = buffer.AsSpan();
-for (int i = 0; i < 104; i++)
+
+if (buffer.TryGetFullSpan(out var span))
 {
-    span[i] = (byte)i;
+    Console.WriteLine(span.Length);
 }
-
-for (int i = 0; i < 104; i++)
-{
-    Console.WriteLine(buffer[i]);
-}
-
-
 
