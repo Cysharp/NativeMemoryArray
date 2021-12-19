@@ -71,6 +71,11 @@ namespace Cysharp.Collections
             return new NativeBufferWriter(this);
         }
 
+        // TODO:
+        // AsSpanSequence
+        // AsMemorySequence
+        // AsReadOnlySequence
+
         public ReadOnlySequence<byte> AsReadOnlySequence()
         {
             // TODO: length == 0

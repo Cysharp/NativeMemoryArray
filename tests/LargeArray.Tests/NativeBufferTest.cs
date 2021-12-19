@@ -11,11 +11,25 @@ namespace LargeArray.Tests
         [Fact]
         public void Foo()
         {
-            using var nbuffer = new NativeBuffer(124);
+            using var nbuffer = new NativeBuffer((nuint)int.MaxValue * 2);
 
 
+            nbuffer.TryGetFullSpan(out var span).Should().BeFalse();
 
-            nbuffer[10] = 124;
+
+            var i = 0;
+            foreach (var item in nbuffer)
+            {
+                if (i++ == 0)
+                {
+                    item.Length.Should().Be(int.MaxValue);
+                }
+                else
+                {
+                    Console.WriteLine("foo");
+                }
+            }
+
         }
     }
 }
