@@ -3,6 +3,8 @@
 using System;
 using System.Buffers;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -29,17 +31,20 @@ namespace Cysharp.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
+                if (index >= length) ThrowArgumentOutOfRangeException(nameof(index));
                 return ref buffer[index];
             }
         }
 
         public Span<byte> Slice(nuint start, int length)
         {
+            if (start + checked((nuint)length) > this.length) ThrowArgumentOutOfRangeException(nameof(length));
             return new Span<byte>(buffer + start, length);
         }
 
         public Memory<byte> SliceMemory(nuint start, int length)
         {
+            if (start + checked((nuint)length) > this.length) ThrowArgumentOutOfRangeException(nameof(length));
             return new PointerMemoryManager(buffer + start, length).Memory;
         }
 
@@ -71,14 +76,31 @@ namespace Cysharp.Collections
             return new NativeBufferWriter(this);
         }
 
-        // TODO:
-        // AsSpanSequence
-        // AsMemorySequence
-        // AsReadOnlySequence
-
-        public ReadOnlySequence<byte> AsReadOnlySequence()
+        public SpanSequence AsSpanSequence(int chunkSize = int.MaxValue)
         {
+            return new SpanSequence(this, chunkSize);
+        }
+
+        public MemorySequence AsMemorySequence(int chunkSize = int.MaxValue)
+        {
+            return new MemorySequence(this, chunkSize);
+        }
+
+        public ReadOnlySequence<byte> AsReadOnlySequence(int chunkSize = int.MaxValue)
+        {
+            // TODO:use chunkSize
             // TODO: length == 0
+            // TODO: chunksize == 0?
+
+
+            // var array = new Segment[length / chunkSize]
+            foreach (var item in this.AsMemorySequence(chunkSize))
+            {
+                new Segment(item);
+            }
+
+
+
 
             Segment? lastSegment = null;
             Segment? nextSegment = null;
@@ -114,7 +136,14 @@ namespace Cysharp.Collections
 
         public SpanSequence GetEnumerator()
         {
-            return new SpanSequence(this);
+            return this.AsSpanSequence(int.MaxValue);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        [DoesNotReturn]
+        void ThrowArgumentOutOfRangeException(string paramName)
+        {
+            throw new ArgumentOutOfRangeException(paramName);
         }
 
         public void Dispose()
@@ -139,22 +168,63 @@ namespace Cysharp.Collections
 
         public ref struct SpanSequence
         {
-            NativeBuffer nativeBuffer;
+            readonly NativeBuffer nativeBuffer;
+            readonly int chunkSize;
             nuint index;
             nuint sliceStart;
 
-            internal SpanSequence(NativeBuffer nativeBuffer)
+            internal SpanSequence(NativeBuffer nativeBuffer, int chunkSize)
             {
                 this.nativeBuffer = nativeBuffer;
                 this.index = 0;
                 this.sliceStart = 0;
+                this.chunkSize = chunkSize;
             }
+
+            public SpanSequence GetEnumerator() => this;
 
             public Span<byte> Current
             {
                 get
                 {
-                    return nativeBuffer.Slice(sliceStart, (int)Math.Min(int.MaxValue, nativeBuffer.length - sliceStart));
+                    return nativeBuffer.Slice(sliceStart, (int)Math.Min(checked((nuint)chunkSize), nativeBuffer.length - sliceStart));
+                }
+            }
+
+            public bool MoveNext()
+            {
+                if (index < nativeBuffer.length)
+                {
+                    sliceStart = index;
+                    index += int.MaxValue;
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        public ref struct MemorySequence
+        {
+            readonly NativeBuffer nativeBuffer;
+            readonly int chunkSize;
+            nuint index;
+            nuint sliceStart;
+
+            internal MemorySequence(NativeBuffer nativeBuffer, int chunkSize)
+            {
+                this.nativeBuffer = nativeBuffer;
+                this.index = 0;
+                this.sliceStart = 0;
+                this.chunkSize = chunkSize;
+            }
+
+            public MemorySequence GetEnumerator() => this;
+
+            public Memory<byte> Current
+            {
+                get
+                {
+                    return nativeBuffer.SliceMemory(sliceStart, (int)Math.Min(checked((nuint)chunkSize), nativeBuffer.length - sliceStart));
                 }
             }
 
@@ -172,15 +242,15 @@ namespace Cysharp.Collections
 
         class Segment : ReadOnlySequenceSegment<byte>
         {
-            public Segment(Memory<byte> buffer, Segment? nextSegment)
+            public Segment(Memory<byte> buffer)
             {
                 Memory = buffer;
-                Next = nextSegment;
             }
 
-            internal void SetRunningIndex(long runningIndex)
+            internal void SetRunningIndexAndNext(long runningIndex, Segment? nextSegment)
             {
                 RunningIndex = runningIndex;
+                Next = nextSegment;
             }
         }
     }
