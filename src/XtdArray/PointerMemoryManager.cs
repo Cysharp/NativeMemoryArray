@@ -5,7 +5,7 @@ namespace XtdArray
 {
     internal sealed unsafe class PointerMemoryManager : MemoryManager<byte>
     {
-        readonly byte* pointer;
+        byte* pointer;
         int length;
         bool usingMemory;
 
@@ -41,9 +41,10 @@ namespace XtdArray
             usingMemory = false;
         }
 
-        public void ResetLength(int length)
+        public void Reset(byte* pointer, int length)
         {
             if (usingMemory) throw new InvalidOperationException("Memory is using, can not reset.");
+            this.pointer = pointer;
             this.length = length;
         }
     }

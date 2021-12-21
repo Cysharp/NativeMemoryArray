@@ -25,6 +25,6 @@
 	<ItemGroup>
 		<Using Include="Xunit" />
 		<Using Include="FluentAssertions" />
-		<Using Include="Cysharp.Collections" />
+		<Using Include="XtdArray" />
 	</ItemGroup>
 </Project>
