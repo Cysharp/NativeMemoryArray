@@ -5,11 +5,11 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9138598E-9FA3-4231-98F0-EBC4D54AC812}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XtdArray", "src\XtdArray\XtdArray.csproj", "{21F01F34-8DE0-448B-BE9F-D0E06D030C06}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NativeMemoryArray", "src\NativeMemoryArray\NativeMemoryArray.csproj", "{21F01F34-8DE0-448B-BE9F-D0E06D030C06}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8E15400D-C0AD-428C-B425-1FE366264F71}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XtdArray.Tests", "tests\XtdArray.Tests\XtdArray.Tests.csproj", "{57AB4D7D-CCF3-463C-A890-06F38952F7CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NativeMemoryArray.Tests", "tests\NativeMemoryArray.Tests\NativeMemoryArray.Tests.csproj", "{57AB4D7D-CCF3-463C-A890-06F38952F7CD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sandbox", "sandbox", "{23CFC43D-B628-48CF-95DA-3A3B840B5F9B}"
 EndProject

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cysharp.Collections;
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,17 +8,21 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit.Sdk;
 
-namespace XtdArray.Tests
+namespace NativeMemoryArrayTests
 {
+    // NativeMemoryArray<byte>
+
     public class NativeBufferTest
     {
         [Fact]
         public void Lower2GB()
         {
-            using var nbuffer = new NativeBuffer(1024);
-            nbuffer.Length.Should().Be(1024);
+            using var nbuffer = new NativeMemoryArray<byte>(1024);
+            ((long)nbuffer.Length).Should().Be(1024);
 
-            var rand = Enumerable.Range(0, (int)nbuffer.Length).Select(x => (byte)Random.Shared.Next(0, byte.MaxValue)).ToArray();
+            var shareRand = new Random();
+
+            var rand = Enumerable.Range(0, (int)nbuffer.Length).Select(x => (byte)shareRand.Next(0, byte.MaxValue)).ToArray();
 
             // copy all
             for (uint i = 0; i < nbuffer.Length; i++)
@@ -41,18 +46,18 @@ namespace XtdArray.Tests
             fullspan.SequenceEqual(rand).Should().BeTrue();
 
             // Slice
-            nbuffer.Slice(114, 99).SequenceEqual(rand.AsSpan().Slice(114, 99)).Should().BeTrue();
-            nbuffer.Slice(35).SequenceEqual(rand.AsSpan().Slice(35)).Should().BeTrue();
-            nbuffer.SliceMemory(114, 99).Span.SequenceEqual(rand.AsSpan().Slice(114, 99)).Should().BeTrue();
-            nbuffer.SliceMemory(35).Span.SequenceEqual(rand.AsSpan().Slice(35)).Should().BeTrue();
+            nbuffer.AsSpan(114, 99).SequenceEqual(rand.AsSpan().Slice(114, 99)).Should().BeTrue();
+            nbuffer.AsSpan(35).SequenceEqual(rand.AsSpan().Slice(35)).Should().BeTrue();
+            nbuffer.AsMemory(114, 99).Span.SequenceEqual(rand.AsSpan().Slice(114, 99)).Should().BeTrue();
+            nbuffer.AsMemory(35).Span.SequenceEqual(rand.AsSpan().Slice(35)).Should().BeTrue();
 
             // Slice:out of range
             rand.AsSpan().Slice(14, 1010).SequenceEqual(rand.AsSpan().Slice(14, 1010)).Should().BeTrue();
-            nbuffer.Slice(14, 1010).SequenceEqual(rand.AsSpan().Slice(14, 1010)).Should().BeTrue();
-            nbuffer.SliceMemory(14, 1010).Span.SequenceEqual(rand.AsSpan().Slice(14, 1010)).Should().BeTrue();
+            nbuffer.AsSpan(14, 1010).SequenceEqual(rand.AsSpan().Slice(14, 1010)).Should().BeTrue();
+            nbuffer.AsMemory(14, 1010).Span.SequenceEqual(rand.AsSpan().Slice(14, 1010)).Should().BeTrue();
             Assert.Throws<ArgumentOutOfRangeException>(() => rand.AsSpan().Slice(14, 1011));
-            Assert.Throws<ArgumentOutOfRangeException>(() => nbuffer.Slice(14, 1011));
-            Assert.Throws<ArgumentOutOfRangeException>(() => nbuffer.SliceMemory(14, 1011));
+            Assert.Throws<ArgumentOutOfRangeException>(() => nbuffer.AsSpan(14, 1011));
+            Assert.Throws<ArgumentOutOfRangeException>(() => nbuffer.AsMemory(14, 1011));
 
             // pointer
             unsafe
@@ -234,7 +239,7 @@ namespace XtdArray.Tests
                 span[1] = 102;
                 bufferWriter.Advance(2);
 
-                nbuffer.Slice(0, 8).ToArray().Should().Equal(100, 200, 201, 202, 203, 204, 101, 102);
+                nbuffer.AsSpan(0, 8).ToArray().Should().Equal(100, 200, 201, 202, 203, 204, 101, 102);
 
                 // too large sizehint.
                 Assert.Throws<InvalidOperationException>(() => bufferWriter.GetSpan(1017));
@@ -248,11 +253,15 @@ namespace XtdArray.Tests
             }
         }
 
+#if NET48
+        [Fact(Skip = "32bit.")]
+#else
         [Fact]
+#endif        
         public unsafe void Over2GB()
         {
             var len = (nuint)int.MaxValue + 1024;
-            using var nbuffer = new NativeBuffer(len);
+            using var nbuffer = new NativeMemoryArray<byte>(len);
             nbuffer.Length.Should().Be(len);
 
 
@@ -264,7 +273,6 @@ namespace XtdArray.Tests
 
             // Single span
             nbuffer.TryGetFullSpan(out var fullspan).Should().BeFalse();
-
 
             var ii = 0;
             foreach (var item in nbuffer)
@@ -293,14 +301,14 @@ namespace XtdArray.Tests
         public unsafe void Empty()
         {
             var reference = Array.Empty<byte>();
-            var nbuffer = NativeBuffer.Empty;
+            var nbuffer = NativeMemoryArray<byte>.Empty;
 
             Assert.Throws<IndexOutOfRangeException>(() => reference[0]);
             Assert.Throws<IndexOutOfRangeException>(() => nbuffer[0]);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => reference.AsSpan().Slice(0, 1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => nbuffer.Slice(0, 1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => nbuffer.SliceMemory(0, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => nbuffer.AsSpan(0, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => nbuffer.AsMemory(0, 1));
 
             fixed (byte* p = reference)
             {

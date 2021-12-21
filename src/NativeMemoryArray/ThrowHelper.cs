@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Text;
 
-namespace XtdArray
+namespace Cysharp.Collections
 {
     internal static class ThrowHelper
     {

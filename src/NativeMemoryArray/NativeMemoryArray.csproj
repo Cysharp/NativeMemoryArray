@@ -5,7 +5,7 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>9.0</LangVersion>
-		<RootNamespace>XtdArray</RootNamespace>
+		<RootNamespace>Cysharp.Collections</RootNamespace>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 

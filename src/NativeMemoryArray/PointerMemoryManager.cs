@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Buffers;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-namespace XtdArray
+namespace Cysharp.Collections
 {
-    internal sealed unsafe class PointerMemoryManager : MemoryManager<byte>
+    internal sealed unsafe class PointerMemoryManager<T> : MemoryManager<T>
     {
         byte* pointer;
         int length;
@@ -20,10 +22,15 @@ namespace XtdArray
         {
         }
 
-        public override Span<byte> GetSpan()
+        public override Span<T> GetSpan()
         {
             usingMemory = true;
-            return new Span<byte>(pointer, length);
+
+#if !NETSTANDARD2_0
+            return MemoryMarshal.CreateSpan(ref Unsafe.AsRef<T>(pointer), length);
+#else
+            return new Span<T>(pointer, length);
+#endif
         }
 
         public override MemoryHandle Pin(int elementIndex = 0)
