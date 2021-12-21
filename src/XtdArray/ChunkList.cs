@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cysharp.Collections
+namespace XtdArray
 {
     // TODO:...
     public sealed class ChunkList

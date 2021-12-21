@@ -1,6 +1,6 @@
 using System.Buffers;
 
-namespace LargeArray.Tests
+namespace XtdArray.Tests
 {
     public class LargeArrayTest
     {

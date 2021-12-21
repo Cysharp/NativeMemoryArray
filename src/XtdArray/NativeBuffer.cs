@@ -2,13 +2,15 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using XtdArray;
 
-namespace Cysharp.Collections
+namespace XtdArray
 {
     public sealed unsafe class NativeBuffer : IDisposable
     {
@@ -22,8 +24,11 @@ namespace Cysharp.Collections
         {
             // TODO: for .NET STANDARD
             // Marshal.AllocHGlobal((IntPtr))
+            var allocSize = (long)checked(length);
+
             this.length = length;
             this.buffer = (byte*)NativeMemory.Alloc(length);
+            GC.AddMemoryPressure(allocSize);
         }
 
         public ref byte this[nuint index]
@@ -86,52 +91,44 @@ namespace Cysharp.Collections
             return new MemorySequence(this, chunkSize);
         }
 
-        public ReadOnlySequence<byte> AsReadOnlySequence(int chunkSize = int.MaxValue)
+        public IReadOnlyList<ReadOnlyMemory<byte>> AsReadOnlyList(int chunkSize = int.MaxValue)
         {
-            // TODO:use chunkSize
-            // TODO: length == 0
-            // TODO: chunksize == 0?
-
-
-            // var array = new Segment[length / chunkSize]
-            foreach (var item in this.AsMemorySequence(chunkSize))
+            var array = new ReadOnlyMemory<byte>[((long)length <= chunkSize) ? 1 : ((long)length / chunkSize) + 1];
             {
-                new Segment(item);
-            }
-
-
-
-
-            Segment? lastSegment = null;
-            Segment? nextSegment = null;
-
-            nuint start = length;
-            while (start != 0)
-            {
-                var last = start;
-                start = (nuint)Math.Max(0, (long)last - int.MaxValue);
-
-                var memory = new PointerMemoryManager(buffer + start, (int)(last - start)).Memory;
-                nextSegment = new Segment(memory, nextSegment);
-                if (lastSegment == null)
+                var i = 0;
+                foreach (var item in this.AsMemorySequence(chunkSize))
                 {
-                    lastSegment = nextSegment;
+                    array[i++] = item;
                 }
             }
 
-            var firstSegment = nextSegment;
-            var segment = firstSegment;
-            var index = 0;
-            while (segment != null)
+            return array;
+        }
+
+        public ReadOnlySequence<byte> AsReadOnlySequence(int chunkSize = int.MaxValue)
+        {
+            // TODO: length == 0
+
+            var array = new Segment[((long)length <= chunkSize) ? 1 : ((long)length / chunkSize) + 1];
             {
-                segment.SetRunningIndex(index);
-                index += segment.Memory.Length;
-                segment = segment.Next as Segment;
+                var i = 0;
+                foreach (var item in this.AsMemorySequence(chunkSize))
+                {
+                    array[i++] = new Segment(item);
+                }
             }
 
-            Debug.Assert(nextSegment != null);
-            Debug.Assert(lastSegment != null);
-            return new ReadOnlySequence<byte>(nextSegment, 0, lastSegment, lastSegment!.Memory.Length);
+            long running = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                var next = i < (array.Length - 1) ? array[i + 1] : null;
+                array[i].SetRunningIndexAndNext(running, next);
+                running += array[i].Memory.Length;
+            }
+
+            var firstSegment = array[0];
+            var lastSegment = array[array.Length - 1];
+            return new ReadOnlySequence<byte>(firstSegment, 0, lastSegment, lastSegment.Memory.Length);
         }
 
         public SpanSequence GetEnumerator()
@@ -158,6 +155,7 @@ namespace Cysharp.Collections
             {
                 isDisposed = true;
                 NativeMemory.Free(buffer);
+                GC.RemoveMemoryPressure((long)length);
             }
         }
 
@@ -196,7 +194,7 @@ namespace Cysharp.Collections
                 if (index < nativeBuffer.length)
                 {
                     sliceStart = index;
-                    index += int.MaxValue;
+                    index += checked((nuint)chunkSize);
                     return true;
                 }
                 return false;
@@ -233,7 +231,7 @@ namespace Cysharp.Collections
                 if (index < nativeBuffer.length)
                 {
                     sliceStart = index;
-                    index += int.MaxValue;
+                    index += checked((nuint)chunkSize);
                     return true;
                 }
                 return false;

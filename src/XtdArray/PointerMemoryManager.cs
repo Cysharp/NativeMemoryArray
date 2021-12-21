@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Buffers;
 
-namespace Cysharp.Collections
+namespace XtdArray
 {
     internal sealed unsafe class PointerMemoryManager : MemoryManager<byte>
     {
@@ -13,7 +13,7 @@ namespace Cysharp.Collections
         {
             this.pointer = pointer;
             this.length = length;
-            this.usingMemory = false;
+            usingMemory = false;
         }
 
         protected override void Dispose(bool disposing)

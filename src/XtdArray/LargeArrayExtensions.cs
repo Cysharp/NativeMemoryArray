@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Cysharp.Collections
+namespace XtdArray
 {
     public static class LargeArrayExtensions
     {
@@ -19,7 +19,7 @@ namespace Cysharp.Collections
                 progress?.Report(read);
                 buffer.Advance(read);
                 memory = buffer.GetMemory();
-                MemoryMarshal.TryGetArray((ReadOnlyMemory<byte>)memory, out array);
+                MemoryMarshal.TryGetArray(memory, out array);
             }
         }
 

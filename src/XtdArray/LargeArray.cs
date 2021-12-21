@@ -3,7 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Cysharp.Collections
+namespace XtdArray
 {
     public sealed class LargeArray<T> : IBufferWriter<T>
     {

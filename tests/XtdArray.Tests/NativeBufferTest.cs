@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit.Sdk;
 
-namespace LargeArray.Tests
+namespace XtdArray.Tests
 {
     public class NativeBufferTest
     {
@@ -78,12 +79,12 @@ namespace LargeArray.Tests
                 else if (ii == 1) // 666
                 {
                     item.Length.Should().Be(333);
-                    item.SequenceEqual(rand.AsSpan(333, 666)).Should().BeTrue();
+                    item.SequenceEqual(rand.AsSpan(333, 333)).Should().BeTrue();
                 }
                 else if (ii == 2) // 999
                 {
                     item.Length.Should().Be(333);
-                    item.SequenceEqual(rand.AsSpan(666, 999)).Should().BeTrue();
+                    item.SequenceEqual(rand.AsSpan(666, 333)).Should().BeTrue();
                 }
                 else if (ii == 3) // 1332
                 {
@@ -94,6 +95,13 @@ namespace LargeArray.Tests
                 {
                     throw new XunitException();
                 }
+                ii++;
+            }
+            ii.Should().Be(4);
+
+            foreach (var item in nbuffer)
+            {
+                item.SequenceEqual(rand).Should().BeTrue();
             }
 
             // AsMemorySequeunce
@@ -108,12 +116,12 @@ namespace LargeArray.Tests
                 else if (ii == 1) // 666
                 {
                     item.Length.Should().Be(333);
-                    item.Span.SequenceEqual(rand.AsSpan(333, 666)).Should().BeTrue();
+                    item.Span.SequenceEqual(rand.AsSpan(333, 333)).Should().BeTrue();
                 }
                 else if (ii == 2) // 999
                 {
                     item.Length.Should().Be(333);
-                    item.Span.SequenceEqual(rand.AsSpan(666, 999)).Should().BeTrue();
+                    item.Span.SequenceEqual(rand.AsSpan(666, 333)).Should().BeTrue();
                 }
                 else if (ii == 3) // 1332
                 {
@@ -124,7 +132,41 @@ namespace LargeArray.Tests
                 {
                     throw new XunitException();
                 }
+                ii++;
             }
+            ii.Should().Be(4);
+
+            // AsReadOnlyList
+            ii = 0;
+            foreach (var item in nbuffer.AsReadOnlyList(333))
+            {
+                if (ii == 0) // 333
+                {
+                    item.Length.Should().Be(333);
+                    item.Span.SequenceEqual(rand.AsSpan(0, 333)).Should().BeTrue();
+                }
+                else if (ii == 1) // 666
+                {
+                    item.Length.Should().Be(333);
+                    item.Span.SequenceEqual(rand.AsSpan(333, 333)).Should().BeTrue();
+                }
+                else if (ii == 2) // 999
+                {
+                    item.Length.Should().Be(333);
+                    item.Span.SequenceEqual(rand.AsSpan(666, 333)).Should().BeTrue();
+                }
+                else if (ii == 3) // 1332
+                {
+                    item.Length.Should().Be(25);
+                    item.Span.SequenceEqual(rand.AsSpan(999)).Should().BeTrue();
+                }
+                else
+                {
+                    throw new XunitException();
+                }
+                ii++;
+            }
+            ii.Should().Be(4);
 
             // AsReadOnlySeqeunce
             ii = 0;
@@ -138,12 +180,12 @@ namespace LargeArray.Tests
                 else if (ii == 1) // 666
                 {
                     item.Length.Should().Be(333);
-                    item.Span.SequenceEqual(rand.AsSpan(333, 666)).Should().BeTrue();
+                    item.Span.SequenceEqual(rand.AsSpan(333, 333)).Should().BeTrue();
                 }
                 else if (ii == 2) // 999
                 {
                     item.Length.Should().Be(333);
-                    item.Span.SequenceEqual(rand.AsSpan(666, 999)).Should().BeTrue();
+                    item.Span.SequenceEqual(rand.AsSpan(666, 333)).Should().BeTrue();
                 }
                 else if (ii == 3) // 1332
                 {
@@ -154,9 +196,44 @@ namespace LargeArray.Tests
                 {
                     throw new XunitException();
                 }
+                ii++;
             }
+            ii.Should().Be(4);
+
+            nbuffer.AsReadOnlySequence().Length.Should().Be(1024L);
+            nbuffer.AsReadOnlySequence().ToArray().Should().Equal(rand);
+            nbuffer.AsReadOnlySequence().Slice(555, 200).Should().Equals(rand.AsSpan(555, 200).ToArray());
 
             // CreateBufferWriter
+            {
+                var bufferWriter = nbuffer.CreateBufferWriter();
+
+                var span = bufferWriter.GetSpan();
+                span[0] = 100;
+                span[1] = 200;
+                bufferWriter.Advance(2);
+
+                nbuffer[0].Should().Be(100);
+                nbuffer[1].Should().Be(200);
+
+                var memory = bufferWriter.GetMemory();
+                memory.Span[0] = 201;
+                memory.Span[1] = 202;
+                bufferWriter.Advance(2);
+
+                memory = bufferWriter.GetMemory();
+                memory.Span[0] = 203;
+                memory.Span[1] = 204;
+                bufferWriter.Advance(2);
+
+                nbuffer.Slice(0, 6).ToArray().Should().Equal(100, 200, 201, 202, 203, 204);
+
+                // TODO: too large sizehint.
+            }
+
+
+
+
         }
 
         [Fact]
