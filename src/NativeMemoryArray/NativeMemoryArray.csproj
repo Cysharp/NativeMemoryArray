@@ -17,4 +17,16 @@
 		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
 	</ItemGroup>
 
+
+	<!-- Copy files for Unity -->
+	<PropertyGroup>
+		<DestinationRoot>$(MSBuildProjectDirectory)\..\NativeMemoryArray.Unity\Assets\Plugins\NativeMemoryArray\Runtime\</DestinationRoot>
+	</PropertyGroup>
+	<ItemGroup>
+		<TargetFiles1 Include="$(MSBuildProjectDirectory)\**\*.cs" Exclude="**\bin\**\*.*;**\obj\**\*.*;_InternalVisibleTo.cs" />
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Copy SourceFiles="@(TargetFiles1)" DestinationFiles="$(DestinationRoot)\%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
+	</Target>
 </Project>
