@@ -4,7 +4,7 @@ NativeMemoryArray
 
 NativeMemoryArray is a native-memory backed array for .NET and Unity. The array size of C# is limited to maximum index of 0x7FFFFFC7(2,147,483,591), [Array.MaxLength](https://docs.microsoft.com/en-us/dotnet/api/system.array.maxlength). In terms of `bytes[]`, it is about 2GB. This is very cheep in the modern world. We handle the 4K/8K videos, large data set of deep-learning, huge 3D scan data of point cloud, etc.
 
-`NativeMemoryArray<T>` provides the native-memory backed array, it supports infinity length, `Span<T>` and `Memory<T>` slices, `IBufferWriter<T>`, `ReadOnlySeqeunce<T>` and .NET 6's new Scatter/Gather I/O API.
+`NativeMemoryArray<T>` provides the native-memory backed array, it supports **infinity** length, `Span<T>` and `Memory<T>` slices, `IBufferWriter<T>`, `ReadOnlySeqeunce<T>` and .NET 6's new Scatter/Gather I/O API.
 
 For example, easy to read huge data in-memory.
 
