@@ -7,6 +7,23 @@
 		<LangVersion>9.0</LangVersion>
 		<RootNamespace>Cysharp.Collections</RootNamespace>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>1701;1702;1591</NoWarn>
+
+		<!-- NuGet Packaging -->
+		<PackageVersion>$(Version)</PackageVersion>
+		<Company>Cysharp</Company>
+		<Authors>Cysharp</Authors>
+		<Copyright>© Cysharp, Inc.</Copyright>
+		<PackageTags>memory</PackageTags>
+		<Description>Utilized native-memory backed array for .NET and Unity.</Description>
+		<PackageProjectUrl>https://github.com/Cysharp/NativeMemoryArray</PackageProjectUrl>
+		<RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>../../opensource.snk</AssemblyOriginatorKeyFile>
+		<PackageIcon>Icon.png</PackageIcon>
 	</PropertyGroup>
 
 	<ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
@@ -17,6 +34,9 @@
 		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<None Include="Icon.png" Pack="true" PackagePath="/" />
+	</ItemGroup>
 
 	<!-- Copy files for Unity -->
 	<PropertyGroup>
