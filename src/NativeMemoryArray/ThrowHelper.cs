@@ -7,7 +7,7 @@ namespace Cysharp.Collections
     internal static class ThrowHelper
     {
         [MethodImpl(MethodImplOptions.NoInlining)]
-#if !NETSTANDARD2_0
+#if !NETSTANDARD2_0 && !UNITY_2019_1_OR_NEWER
         [DoesNotReturn]
 #endif
         public static void ThrowIndexOutOfRangeException()
@@ -16,7 +16,7 @@ namespace Cysharp.Collections
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-#if !NETSTANDARD2_0
+#if !NETSTANDARD2_0 && !UNITY_2019_1_OR_NEWER
         [DoesNotReturn]
 #endif
         public static void ThrowArgumentOutOfRangeException(string paramName)

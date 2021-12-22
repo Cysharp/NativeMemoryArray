@@ -32,7 +32,11 @@ namespace Cysharp.Collections
             if (length == 0)
             {
                 this.length = length;
+#if UNITY_2019_1_OR_NEWER
+                buffer = (byte*)Unsafe.AsPointer(ref Unsafe.AsRef<byte>(null));
+#else
                 buffer = (byte*)Unsafe.AsPointer(ref Unsafe.NullRef<byte>());
+#endif
             }
             else
             {
@@ -111,7 +115,11 @@ namespace Cysharp.Collections
         {
             if (length == 0)
             {
+#if UNITY_2019_1_OR_NEWER
+                return ref Unsafe.AsRef<T>(null);
+#else
                 return ref Unsafe.NullRef<T>();
+#endif
             }
             return ref this[0];
         }
@@ -224,7 +232,11 @@ namespace Cysharp.Collections
             if (!isDisposed)
             {
                 isDisposed = true;
+#if UNITY_2019_1_OR_NEWER
+                if (buffer == null) return;
+#else
                 if (Unsafe.IsNullRef(ref Unsafe.AsRef<byte>(buffer))) return;
+#endif
 
 #if NET6_0_OR_GREATER
                 NativeMemory.Free(buffer);

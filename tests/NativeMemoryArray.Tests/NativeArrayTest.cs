@@ -17,35 +17,9 @@ namespace NativeMemoryArrayTests
 
             array.AsSpan().SequenceEqual(refarray).Should().BeTrue();
 
-            for (nuint i = 0; i < array.Length; i++)
+            for (long i = 0; i < array.Length; i++)
             {
                 array[i].Should().Be(refarray[i]);
-            }
-        }
-
-#if NET48
-        [Fact(Skip = "Reference type is not supported on netstandard2.0.")]
-#else
-        [Fact]
-#endif   
-        public void ReferenceType()
-        {
-            using var array = new NativeMemoryArray<ReferenceTypeSample>(15);
-
-            foreach (var item in array.AsSpan())
-            {
-                item.Should().BeNull();
-            }
-
-            for (int i = 0; i < 15; i++)
-            {
-                array[(nuint)i] = new ReferenceTypeSample { MyProperty = i };
-            }
-
-
-            for (int i = 0; i < 15; i++)
-            {
-                array[(nuint)i].MyProperty.Should().Be(i);
             }
         }
 
@@ -56,12 +30,12 @@ namespace NativeMemoryArrayTests
 
             for (int i = 0; i < 15; i++)
             {
-                array[(nuint)i] = new ValueTypeSample { X = i, Y = i * i, Z = i * i * i };
+                array[(long)i] = new ValueTypeSample { X = i, Y = i * i, Z = i * i * i };
             }
 
             for (int i = 0; i < 15; i++)
             {
-                var v = array[(nuint)i];
+                var v = array[(long)i];
                 v.X.Should().Be(i);
                 v.Y.Should().Be(i * i);
                 v.Z.Should().Be(i * i * i);

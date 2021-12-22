@@ -260,7 +260,7 @@ namespace NativeMemoryArrayTests
 #endif        
         public unsafe void Over2GB()
         {
-            var len = (nuint)int.MaxValue + 1024;
+            var len = (long)int.MaxValue + 1024;
             using var nbuffer = new NativeMemoryArray<byte>(len);
             nbuffer.Length.Should().Be(len);
 
