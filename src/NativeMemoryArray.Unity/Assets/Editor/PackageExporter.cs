@@ -1,6 +1,4 @@
-﻿#if UNITY_EDITOR
-
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -11,31 +9,35 @@ public static class PackageExporter
     [MenuItem("Tools/Export Unitypackage")]
     public static void Export()
     {
-        var roots = new[] { "Plugins/NativeMemoryArray" };
+        var root = "Plugins/NativeMemoryArray";
+        var version = GetVersion(root);
 
-        foreach (var root in roots)
-        {
-            var version = GetVersion(root);
-            var fn = root.Split('/').Last();
+        var fileName = string.IsNullOrEmpty(version) ? "NativeMemoryArray.Unity.unitypackage" : $"NativeMemoryArray.Unity.{version}.unitypackage";
+        var exportPath = "./" + fileName;
 
-            var fileName = string.IsNullOrEmpty(version) ? $"{fn}.unitypackage" : $"{fn}.{version}.unitypackage";
-            var exportPath = "./" + fileName;
+        var path = Path.Combine(Application.dataPath, root);
+        var assets = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
+            .Where(x => Path.GetExtension(x) == ".cs" || Path.GetExtension(x) == ".meta" || Path.GetExtension(x) == ".asmdef" || Path.GetExtension(x) == ".json")
+            .Where(x => Path.GetFileNameWithoutExtension(x) != "_InternalVisibleTo")
+            .Select(x => "Assets" + x.Replace(Application.dataPath, "").Replace(@"\", "/"))
+            .ToArray();
 
-            var path = Path.Combine(Application.dataPath, root);
-            var assets = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
-                .Where(x => Path.GetExtension(x) == ".cs" || Path.GetExtension(x) == ".asmdef" || Path.GetExtension(x) == ".json" || Path.GetExtension(x) == ".meta")
-                .Select(x => "Assets" + x.Replace(Application.dataPath, "").Replace(@"\", "/"))
-                .ToArray();
+        var netStandardsAsset = Directory.EnumerateFiles(Path.Combine(Application.dataPath, "Plugins/"), "*", SearchOption.TopDirectoryOnly)
+            .Select(x => "Assets" + x.Replace(Application.dataPath, "").Replace(@"\", "/"))
+            .ToArray();
 
-            UnityEngine.Debug.Log("Export below files" + Environment.NewLine + string.Join(Environment.NewLine, assets));
+        assets = assets.Concat(netStandardsAsset).ToArray();
 
-            AssetDatabase.ExportPackage(
-                assets,
-                exportPath,
-                ExportPackageOptions.Default);
+        UnityEngine.Debug.Log("Export below files" + Environment.NewLine + string.Join(Environment.NewLine, assets));
 
-            UnityEngine.Debug.Log("Export complete: " + Path.GetFullPath(exportPath));
-        }
+        var dir = new FileInfo(exportPath).Directory;
+        if (!dir.Exists) dir.Create();
+        AssetDatabase.ExportPackage(
+            assets,
+            exportPath,
+            ExportPackageOptions.Default);
+
+        UnityEngine.Debug.Log("Export complete: " + Path.GetFullPath(exportPath));
     }
 
     static string GetVersion(string root)
@@ -74,5 +76,3 @@ public static class PackageExporter
         public string version;
     }
 }
-
-#endif

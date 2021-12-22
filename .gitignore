@@ -125,3 +125,11 @@ src/NativeMemoryArray.Unity/Assembly-CSharp.csproj
 src/NativeMemoryArray.Unity/Assembly-CSharp-Editor.csproj
 
 src/NativeMemoryArray.Unity/Assembly-CSharp-firstpass.csproj
+
+src/NativeMemoryArray.Unity/NativeMemoryArray.Unity.1.0.0.unitypackage
+
+src/NativeMemoryArray.Unity/NativeMemoryArray.Unity.unitypackage
+
+src/NativeMemoryArray.Unity/NativeMemoryArray.unitypackage
+
+src/NativeMemoryArray.Unity/NewAssembly.csproj
