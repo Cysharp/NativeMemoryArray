@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Buffers;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace Cysharp.Collections
 {
     internal sealed unsafe class PointerMemoryManager<T> : MemoryManager<T>
+        where T : unmanaged
     {
         byte* pointer;
         int length;
@@ -25,17 +24,12 @@ namespace Cysharp.Collections
         public override Span<T> GetSpan()
         {
             usingMemory = true;
-
-#if !NETSTANDARD2_0
-            return MemoryMarshal.CreateSpan(ref Unsafe.AsRef<T>(pointer), length);
-#else
             return new Span<T>(pointer, length);
-#endif
         }
 
         public override MemoryHandle Pin(int elementIndex = 0)
         {
-            return default;
+            return new MemoryHandle(pointer + elementIndex, default, this);
         }
 
         public override void Unpin()

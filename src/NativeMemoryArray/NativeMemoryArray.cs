@@ -9,14 +9,15 @@ namespace Cysharp.Collections
 {
     [DebuggerTypeProxy(typeof(NativeMemoryArrayDebugView<>))]
     public sealed unsafe class NativeMemoryArray<T> : IDisposable
+        where T : unmanaged
     {
         public static readonly NativeMemoryArray<T> Empty;
 
         internal readonly byte* buffer;
-        readonly nuint length;
+        readonly long length;
         bool isDisposed;
 
-        public nuint Length => length;
+        public long Length => length;
 
         static NativeMemoryArray()
         {
@@ -24,7 +25,7 @@ namespace Cysharp.Collections
             Empty.Dispose();
         }
 
-        public NativeMemoryArray(nuint length, bool skipZeroClear = false)
+        public NativeMemoryArray(long length, bool skipZeroClear = false)
         {
             if (length == 0)
             {
@@ -33,16 +34,16 @@ namespace Cysharp.Collections
             }
             else
             {
-                var allocSize = (long)checked(length) * Unsafe.SizeOf<T>();
+                var allocSize = length * Unsafe.SizeOf<T>();
                 this.length = length;
 #if NET6_0_OR_GREATER
                 if (skipZeroClear)
                 {
-                    buffer = (byte*)NativeMemory.Alloc(length, (nuint)Unsafe.SizeOf<T>());
+                    buffer = (byte*)NativeMemory.Alloc(checked((nuint)length), (nuint)Unsafe.SizeOf<T>());
                 }
                 else
                 {
-                    buffer = (byte*)NativeMemory.AllocZeroed(length, (nuint)Unsafe.SizeOf<T>());
+                    buffer = (byte*)NativeMemory.AllocZeroed(checked((nuint)length), (nuint)Unsafe.SizeOf<T>());
                 }
 #else
                 buffer = (byte*)Marshal.AllocHGlobal((IntPtr)allocSize);
@@ -58,13 +59,14 @@ namespace Cysharp.Collections
             }
         }
 
-        public ref T this[nuint index]
+        public ref T this[long index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
+                if (index < 0) ThrowHelper.ThrowIndexOutOfRangeException();
                 if (index >= length) ThrowHelper.ThrowIndexOutOfRangeException();
-                var memoryIndex = checked((long)index) * Unsafe.SizeOf<T>();
+                var memoryIndex = index * Unsafe.SizeOf<T>();
                 return ref Unsafe.AsRef<T>(buffer + memoryIndex);
             }
         }
@@ -74,21 +76,16 @@ namespace Cysharp.Collections
             return AsSpan(0);
         }
 
-        public Span<T> AsSpan(nuint start)
+        public Span<T> AsSpan(long start)
         {
-            if (start > length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
+            if (start < 0 || start > length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
             return AsSpan(start, checked((int)(length - start)));
         }
 
-        public Span<T> AsSpan(nuint start, int length)
+        public Span<T> AsSpan(long start, int length)
         {
-            if (start + checked((nuint)length) > this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
-
-#if !NETSTANDARD2_0
-            return MemoryMarshal.CreateSpan(ref this[start], length);
-#else
+            if (start < 0 || start + length > this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
             return new Span<T>(buffer + start, length);
-#endif
         }
 
         public Memory<T> AsMemory()
@@ -96,15 +93,15 @@ namespace Cysharp.Collections
             return AsMemory(0);
         }
 
-        public Memory<T> AsMemory(nuint start)
+        public Memory<T> AsMemory(long start)
         {
-            if (start > length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
+            if (start < 0 || start > length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
             return AsMemory(start, checked((int)(length - start)));
         }
 
-        public Memory<T> AsMemory(nuint start, int length)
+        public Memory<T> AsMemory(long start, int length)
         {
-            if (start + checked((nuint)length) > this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
+            if (start < 0 || start + length > this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
             return new PointerMemoryManager<T>(buffer + start, length).Memory;
         }
 
@@ -146,7 +143,23 @@ namespace Cysharp.Collections
             return new MemorySequence(this, chunkSize);
         }
 
-        public IReadOnlyList<ReadOnlyMemory<T>> AsReadOnlyList(int chunkSize = int.MaxValue)
+        public IReadOnlyList<Memory<T>> AsMemoryList(int chunkSize = int.MaxValue)
+        {
+            if (length == 0) return Array.Empty<Memory<T>>();
+
+            var array = new Memory<T>[(long)length <= chunkSize ? 1 : (long)length / chunkSize + 1];
+            {
+                var i = 0;
+                foreach (var item in AsMemorySequence(chunkSize))
+                {
+                    array[i++] = item;
+                }
+            }
+
+            return array;
+        }
+
+        public IReadOnlyList<ReadOnlyMemory<T>> AsReadOnlyMemoryList(int chunkSize = int.MaxValue)
         {
             if (length == 0) return Array.Empty<ReadOnlyMemory<T>>();
 
@@ -225,12 +238,12 @@ namespace Cysharp.Collections
             DisposeCore();
         }
 
-        public ref struct SpanSequence
+        public struct SpanSequence
         {
             readonly NativeMemoryArray<T> nativeArray;
             readonly int chunkSize;
-            nuint index;
-            nuint sliceStart;
+            long index;
+            long sliceStart;
 
             internal SpanSequence(NativeMemoryArray<T> nativeArray, int chunkSize)
             {
@@ -246,7 +259,7 @@ namespace Cysharp.Collections
             {
                 get
                 {
-                    return nativeArray.AsSpan(sliceStart, (int)Math.Min(checked((nuint)chunkSize), nativeArray.length - sliceStart));
+                    return nativeArray.AsSpan(sliceStart, (int)Math.Min(chunkSize, nativeArray.length - sliceStart));
                 }
             }
 
@@ -255,19 +268,19 @@ namespace Cysharp.Collections
                 if (index < nativeArray.length)
                 {
                     sliceStart = index;
-                    index += checked((nuint)chunkSize);
+                    index += chunkSize;
                     return true;
                 }
                 return false;
             }
         }
 
-        public ref struct MemorySequence
+        public struct MemorySequence
         {
             readonly NativeMemoryArray<T> nativeArray;
             readonly int chunkSize;
-            nuint index;
-            nuint sliceStart;
+            long index;
+            long sliceStart;
 
             internal MemorySequence(NativeMemoryArray<T> nativeArray, int chunkSize)
             {
@@ -283,7 +296,7 @@ namespace Cysharp.Collections
             {
                 get
                 {
-                    return nativeArray.AsMemory(sliceStart, (int)Math.Min(checked((nuint)chunkSize), nativeArray.length - sliceStart));
+                    return nativeArray.AsMemory(sliceStart, (int)Math.Min(chunkSize, nativeArray.length - sliceStart));
                 }
             }
 
@@ -292,7 +305,7 @@ namespace Cysharp.Collections
                 if (index < nativeArray.length)
                 {
                     sliceStart = index;
-                    index += checked((nuint)chunkSize);
+                    index += chunkSize;
                     return true;
                 }
                 return false;
@@ -315,10 +328,11 @@ namespace Cysharp.Collections
     }
 
     internal sealed unsafe class NativeMemoryArrayBufferWriter<T> : IBufferWriter<T>
+        where T : unmanaged
     {
         readonly NativeMemoryArray<T> nativeArray;
         PointerMemoryManager<T>? pointerMemoryManager;
-        nuint written;
+        long written;
 
         internal NativeMemoryArrayBufferWriter(NativeMemoryArray<T> nativeArray)
         {
@@ -328,7 +342,7 @@ namespace Cysharp.Collections
 
         public void Advance(int count)
         {
-            written += checked((nuint)count);
+            written += count;
             if (pointerMemoryManager != null)
             {
                 pointerMemoryManager.AllowReuse();
@@ -337,20 +351,18 @@ namespace Cysharp.Collections
 
         public Span<T> GetSpan(int sizeHint = 0)
         {
-            if (nativeArray.Length - written < checked((nuint)sizeHint)) throw new InvalidOperationException($"sizeHint:{sizeHint} is capacity:{nativeArray.Length} - written:{written} over");
+            if (sizeHint < 0) throw new InvalidOperationException($"sizeHint:{sizeHint} is invalid range.");
+            if (nativeArray.Length - written < sizeHint) throw new InvalidOperationException($"sizeHint:{sizeHint} is capacity:{nativeArray.Length} - written:{written} over");
             var length = (int)Math.Min(int.MaxValue, nativeArray.Length - written);
 
             if (length == 0) return Array.Empty<T>();
-#if !NETSTANDARD2_0
-            return MemoryMarshal.CreateSpan(ref nativeArray[written], length);
-#else
             return new Span<T>(nativeArray.buffer + written, length);
-#endif
         }
 
         public Memory<T> GetMemory(int sizeHint = 0)
         {
-            if (nativeArray.Length - written < checked((nuint)sizeHint)) throw new InvalidOperationException($"sizeHint:{sizeHint} is capacity:{nativeArray.Length} - written:{written} over");
+            if (sizeHint < 0) throw new InvalidOperationException($"sizeHint:{sizeHint} is invalid range.");
+            if (nativeArray.Length - written < sizeHint) throw new InvalidOperationException($"sizeHint:{sizeHint} is capacity:{nativeArray.Length} - written:{written} over");
             var length = (int)Math.Min(int.MaxValue, nativeArray.Length - written);
             if (length == 0) return Array.Empty<T>();
 
@@ -368,6 +380,7 @@ namespace Cysharp.Collections
     }
 
     internal sealed class NativeMemoryArrayDebugView<T>
+        where T : unmanaged
     {
         private readonly NativeMemoryArray<T> array;
 
@@ -391,7 +404,7 @@ namespace Cysharp.Collections
                 }
                 else
                 {
-                    return array.AsSpan(0, int.MaxValue);
+                    return array.AsSpan(0, 1000000); // limit
                 }
             }
         }

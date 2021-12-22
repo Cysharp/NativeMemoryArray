@@ -146,7 +146,7 @@ namespace NativeMemoryArrayTests
 
             // AsReadOnlyList
             ii = 0;
-            foreach (var item in nbuffer.AsReadOnlyList(333))
+            foreach (var item in nbuffer.AsReadOnlyMemoryList(333))
             {
                 if (ii == 0) // 333
                 {
@@ -335,7 +335,7 @@ namespace NativeMemoryArrayTests
 
             nbuffer.AsSpanSequence().MoveNext().Should().BeFalse();
             nbuffer.AsMemorySequence().MoveNext().Should().BeFalse();
-            nbuffer.AsReadOnlyList().Count.Should().Be(0);
+            nbuffer.AsReadOnlyMemoryList().Count.Should().Be(0);
         }
     }
 }

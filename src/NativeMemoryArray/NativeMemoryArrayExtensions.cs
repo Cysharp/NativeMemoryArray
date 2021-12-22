@@ -21,22 +21,17 @@ namespace Cysharp.Collections
             }
         }
 
-        public static async Task WriteToFileAsync(this NativeMemoryArray<byte> buffer, string path, FileMode mode = FileMode.Create, CancellationToken cancellationToken = default)
+        public static async Task WriteToFileAsync(this NativeMemoryArray<byte> buffer, string path, FileMode mode = FileMode.Create, IProgress<int>? progress = null, CancellationToken cancellationToken = default)
         {
-#if NET6_0_OR_GREATER
-            using var handle = File.OpenHandle(path, mode, FileAccess.Write, FileShare.Read, FileOptions.Asynchronous, 0);
-            await RandomAccess.WriteAsync(handle, buffer.AsReadOnlyList(), 0, cancellationToken);
-#else
-            using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite, 1, useAsync: true))
+            using (var fs = new FileStream(path, mode, FileAccess.Write, FileShare.ReadWrite, 1, useAsync: true))
             {
-                await buffer.WriteToAsync(fs, cancellationToken: cancellationToken);
+                await buffer.WriteToAsync(fs, progress: progress, cancellationToken: cancellationToken);
             }
-#endif
         }
 
         public static async Task WriteToAsync(this NativeMemoryArray<byte> buffer, Stream stream, int chunkSize = int.MaxValue, IProgress<int>? progress = null, CancellationToken cancellationToken = default)
         {
-            foreach (var item in buffer.AsReadOnlyList(chunkSize))
+            foreach (var item in buffer.AsReadOnlyMemoryList(chunkSize))
             {
                 await stream.WriteAsync(item, cancellationToken);
                 progress?.Report(item.Length);
