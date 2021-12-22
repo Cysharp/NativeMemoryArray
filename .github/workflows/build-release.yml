@@ -84,6 +84,9 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ needs.update-packagejson.outputs.sha }}
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
       - run: dotnet build src/NativeMemoryArray -c Release -p:Version=${{ env.GIT_TAG }}
       - run: dotnet test tests/NativeMemoryArray.Tests -c Release --no-build
       - run: dotnet pack ./src/NativeMemoryArray/NativeMemoryArray.csproj -c Release --no-build -p:Version=${{ env.GIT_TAG }} -o ./publish
