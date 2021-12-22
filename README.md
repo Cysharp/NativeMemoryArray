@@ -47,7 +47,7 @@ Getting Started
 ---
 For .NET, use NuGet. For Unity, please read [Unity](#Unity) section.
 
-PM> Install-Package [NativeMemoryArray](https://www.nuget.org/packages/NativeMemoryArray)
+> PM> Install-Package [NativeMemoryArray](https://www.nuget.org/packages/NativeMemoryArray)
 
 NativeMemoryArray provides only simple `Cysharp.Collections.NativeMemoryArray<T>` class. It has `where T : unmanaged` constraint so you can only use struct that not includes reference type.
 
