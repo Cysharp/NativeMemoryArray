@@ -242,7 +242,7 @@ namespace Cysharp.Collections
 #else
                 Marshal.FreeHGlobal((IntPtr)buffer);
 #endif
-                GC.RemoveMemoryPressure((long)length);
+                GC.RemoveMemoryPressure(length * Unsafe.SizeOf<T>());
             }
         }
 
