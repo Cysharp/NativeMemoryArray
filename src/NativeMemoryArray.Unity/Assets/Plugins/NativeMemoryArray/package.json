@@ -2,7 +2,7 @@
     "name": "com.cysharp.nativememoryarray",
     "displayName": "NativeMemoryArray",
     "author": { "name": "Cysharp, Inc.", "url": "https://cysharp.co.jp/en/" },
-    "version": "1.0.0",
+    "version": "1.0.1",
     "unity": "2020.1",
     "description": "Utilized native-memory backed array.",
     "keywords": [ "array", "unsafe", "memory", "buffer" ],
