@@ -83,13 +83,13 @@ namespace Cysharp.Collections
 
         public Span<T> AsSpan(long start)
         {
-            if (start < 0 || start > length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
+            if ((ulong)start > (ulong)length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
             return AsSpan(start, checked((int)(length - start)));
         }
 
         public Span<T> AsSpan(long start, int length)
         {
-            if (start < 0 || start + length > this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
+            if ((ulong)(start + length) > (ulong)this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
             return new Span<T>(buffer + start, length);
         }
 
@@ -100,13 +100,13 @@ namespace Cysharp.Collections
 
         public Memory<T> AsMemory(long start)
         {
-            if (start < 0 || start > length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
+            if ((ulong)start > (ulong)length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
             return AsMemory(start, checked((int)(length - start)));
         }
 
         public Memory<T> AsMemory(long start, int length)
         {
-            if (start < 0 || start + length > this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
+            if ((ulong)(start + length) > (ulong)(this.length)) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
             return new PointerMemoryManager<T>(buffer + start, length).Memory;
         }
 
