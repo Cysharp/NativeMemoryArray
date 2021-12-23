@@ -70,8 +70,7 @@ namespace Cysharp.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (index < 0) ThrowHelper.ThrowIndexOutOfRangeException();
-                if (index >= length) ThrowHelper.ThrowIndexOutOfRangeException();
+                if ((ulong)index >= (ulong)length) ThrowHelper.ThrowIndexOutOfRangeException();
                 var memoryIndex = index * Unsafe.SizeOf<T>();
                 return ref Unsafe.AsRef<T>(buffer + memoryIndex);
             }
@@ -84,13 +83,13 @@ namespace Cysharp.Collections
 
         public Span<T> AsSpan(long start)
         {
-            if (start < 0 || start > length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
+            if ((ulong)start > (ulong)length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
             return AsSpan(start, checked((int)(length - start)));
         }
 
         public Span<T> AsSpan(long start, int length)
         {
-            if (start < 0 || start + length > this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
+            if ((ulong)(start + length) > (ulong)this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
             return new Span<T>(buffer + start, length);
         }
 
@@ -101,13 +100,13 @@ namespace Cysharp.Collections
 
         public Memory<T> AsMemory(long start)
         {
-            if (start < 0 || start > length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
+            if ((ulong)start > (ulong)length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(start));
             return AsMemory(start, checked((int)(length - start)));
         }
 
         public Memory<T> AsMemory(long start, int length)
         {
-            if (start < 0 || start + length > this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
+            if ((ulong)(start + length) > (ulong)(this.length)) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
             return new PointerMemoryManager<T>(buffer + start, length).Memory;
         }
 
@@ -243,7 +242,7 @@ namespace Cysharp.Collections
 #else
                 Marshal.FreeHGlobal((IntPtr)buffer);
 #endif
-                GC.RemoveMemoryPressure((long)length);
+                GC.RemoveMemoryPressure(length * Unsafe.SizeOf<T>());
             }
         }
 
