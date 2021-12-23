@@ -51,6 +51,21 @@ For .NET, use NuGet. For Unity, please read [Unity](#Unity) section.
 
 NativeMemoryArray provides only simple `Cysharp.Collections.NativeMemoryArray<T>` class. It has `where T : unmanaged` constraint so you can only use struct that not includes reference type.
 
+```csharp
+// call ctor with length, when Dispose free memory.
+using var buffer = new NativeMemoryArray<byte>(10);
+
+buffer[0] = 100;
+buffer[1] = 100;
+
+// T allows all unmanaged(struct that not includes reference type) type.
+using var mesh = new NativeMemoryArray<Vector3>(100);
+
+// AsSpan() can create Span view so you can use all Span APIs(CopyTo/From, Write/Read etc.).
+var otherMeshArray = new Vector3[100];
+otherMeshArray.CopyTo(mesh.AsSpan());
+```
+
 The difference with `Span<T>` is that `NativeMemoryArray<T>` itself is a class, so it can be placed in a field. This means that, unlike `Span<T>`, it is possible to ensure some long lifetime. Since you can make a slice of `Memory<T>`, you can also pass it into Async methods. Also, the length limit of `Span<T>` is up to int.MaxValue (roughly 2GB), however `NativeMemoryArray<T>` can be larger than that.
 
 The main advantages are as follows
@@ -63,7 +78,7 @@ The main advantages are as follows
 
 All `NativeMemoryArray<T>` APIs are as follows
 
-* `NativeMemoryArray(long length, bool skipZeroClear = false)`
+* `NativeMemoryArray(long length, bool skipZeroClear = false, bool addMemoryPressure = false)`
 * `long Length`
 * `ref T this[long index]`
 * `ref T GetPinnableReference()`
@@ -83,7 +98,7 @@ All `NativeMemoryArray<T>` APIs are as follows
 * `SpanSequence GetEnumerator()`
 * `void Dispose()`
 
-`NativeMemoryArray<T>` allocates memory by [NativeMemory.Alloc/AllocZeroed](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.nativememory) so you need to call `Dispose()` or use `using scope`. In the default, allocated memory is zero-cleared. You can configure via `bool skipZeroClear`.
+`NativeMemoryArray<T>` allocates memory by [NativeMemory.Alloc/AllocZeroed](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.nativememory) so you need to call `Dispose()` or use `using scope`. In the default, allocated memory is zero-cleared. You can configure via `bool skipZeroClear`. When `bool addMemoryPressure` is true, calls [GC.AddMemoryPressure](https://docs.microsoft.com/en-us/dotnet/api/system.gc.addmemorypressure) and [GC.RemoveMemoryPressure](https://docs.microsoft.com/en-us/dotnet/api/system.gc.removememorypressure) at alloc/free memory. Default is false but if you want to inform allocated memory size to managed GC, set to true.
 
 `AsSpan()` and `AsMemory()` are APIs for Slice. Returned `Span` and `Memory` possible to allow write operation so you can pass to the Span operation methods. `Span` and `Memory` have limitation of length(int.MaxValue) so if length is omitted, throws exception if array is larger. Using `TryGetFullSpan()` detect can get single full span or not. `AsSpanSequence()` and `AsMemorySequence()` are iterate chunked all data via foreach. Using foreach directly as same as `AsSpanSequence()`.
 
