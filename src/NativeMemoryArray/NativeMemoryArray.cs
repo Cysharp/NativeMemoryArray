@@ -70,8 +70,7 @@ namespace Cysharp.Collections
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (index < 0) ThrowHelper.ThrowIndexOutOfRangeException();
-                if (index >= length) ThrowHelper.ThrowIndexOutOfRangeException();
+                if ((ulong)index >= (ulong)length) ThrowHelper.ThrowIndexOutOfRangeException();
                 var memoryIndex = index * Unsafe.SizeOf<T>();
                 return ref Unsafe.AsRef<T>(buffer + memoryIndex);
             }
