@@ -51,7 +51,7 @@ For .NET, use NuGet. For Unity, please read [Unity](#Unity) section.
 
 NativeMemoryArray provides only simple `Cysharp.Collections.NativeMemoryArray<T>` class. It has `where T : unmanaged` constraint so you can only use struct that not includes reference type.
 
-The difference with `Span<T>` is that `NativeMemoryArray<T>` itself is a class, so it can be placed in a field. This means that, unlike `Span<T>`, it is possible to ensure some long lifetime. Since you can make a slice of `Memory<T>`, you can also throw it into Async methods. Also, the length limit of `Span<T>` is up to int.MaxValue (roughly 2GB), however `NativeMemoryArray<T>` can be larger than that.
+The difference with `Span<T>` is that `NativeMemoryArray<T>` itself is a class, so it can be placed in a field. This means that, unlike `Span<T>`, it is possible to ensure some long lifetime. Since you can make a slice of `Memory<T>`, you can also pass it into Async methods. Also, the length limit of `Span<T>` is up to int.MaxValue (roughly 2GB), however `NativeMemoryArray<T>` can be larger than that.
 
 The main advantages are as follows
 
