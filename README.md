@@ -73,6 +73,10 @@ All `NativeMemoryArray<T>` APIs are as follows
 * `Memory<T> AsMemory()`
 * `Memory<T> AsMemory(long start)`
 * `Memory<T> AsMemory(long start, int length)`
+* `Stream AsStream()`
+* `Stream AsStream(long offset)`
+* `Stream AsStream(FileAccess fileAccess)`
+* `Stream AsStream(long offset, FileAccess fileAccess)`
 * `bool TryGetFullSpan(out Span<T> span)`
 * `IBufferWriter<T> CreateBufferWriter()`
 * `SpanSequence AsSpanSequence(int chunkSize = int.MaxValue)`

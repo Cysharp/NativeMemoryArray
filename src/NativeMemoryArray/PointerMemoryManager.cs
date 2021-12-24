@@ -38,7 +38,6 @@ namespace Cysharp.Collections
         {
         }
 
-
         public void AllowReuse()
         {
             usingMemory = false;

@@ -111,27 +111,29 @@ namespace Cysharp.Collections
             return new PointerMemoryManager<T>(buffer + start * Unsafe.SizeOf<T>(), length).Memory;
         }
 
-        //public UnmanagedMemoryStream AsStream()
-        //{
-        //    return new UnmanagedMemoryStream(buffer, length * Unsafe.SizeOf<T>());
-        //}
+        public Stream AsStream()
+        {
+            return new UnmanagedMemoryStream(buffer, length * Unsafe.SizeOf<T>());
+        }
 
-        //public UnmanagedMemoryStream AsStream(long offset)
-        //{
+        public Stream AsStream(long offset)
+        {
+            if ((ulong)offset > (ulong)length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(offset));
+            return new UnmanagedMemoryStream(buffer + offset * Unsafe.SizeOf<T>(), length * Unsafe.SizeOf<T>());
+        }
 
+        public Stream AsStream(FileAccess fileAccess)
+        {
+            var len = length * Unsafe.SizeOf<T>();
+            return new UnmanagedMemoryStream(buffer, len, len, fileAccess);
+        }
 
-        //    return new UnmanagedMemoryStream(buffer + offset * Unsafe.SizeOf<T>(), length * Unsafe.SizeOf<T>());
-        //}
-
-        //public UnmanagedMemoryStream AsStream()
-        //{
-        //    return new UnmanagedMemoryStream(buffer, length * Unsafe.SizeOf<T>());
-        //}
-
-        //public UnmanagedMemoryStream AsStream()
-        //{
-        //    return new UnmanagedMemoryStream(buffer, length * Unsafe.SizeOf<T>());
-        //}
+        public Stream AsStream(long offset, FileAccess fileAccess)
+        {
+            if ((ulong)offset > (ulong)length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(offset));
+            var len = length * Unsafe.SizeOf<T>();
+            return new UnmanagedMemoryStream(buffer + offset * Unsafe.SizeOf<T>(), len, len, fileAccess);
+        }
 
         public ref T GetPinnableReference()
         {

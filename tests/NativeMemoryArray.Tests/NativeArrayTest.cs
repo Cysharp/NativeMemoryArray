@@ -53,7 +53,7 @@ namespace NativeMemoryArrayTests
             {
                 var slice = array.AsSpan(3, 4);
                 slice.Length.Should().Be(4);
-                
+
                 slice[0].Should().Be(3);
                 slice[1].Should().Be(4);
                 slice[2].Should().Be(5);
@@ -100,7 +100,37 @@ namespace NativeMemoryArrayTests
 
                 array.AsSpan(0, 6).ToArray().Should().Equal(1000, 2000, 3000, 4000, 5000, 6000);
             }
+        }
 
+        [Fact]
+        public void Stream()
+        {
+            using var array = new NativeMemoryArray<byte>(1024);
+            Enumerable.Range(1, 1024).Select(x => (byte)x).ToArray().CopyTo(array.AsSpan());
+
+            var readStream = array.AsStream();
+            var writeStream = array.AsStream(FileAccess.Write);
+
+            var buffer = new byte[1024];
+            readStream.Read(buffer, 0, 10);
+
+            var span = array.AsSpan();
+            span[0].Should().Be(1);
+            span[1].Should().Be(2);
+            span[2].Should().Be(3);
+            span[3].Should().Be(4);
+            span[4].Should().Be(5);
+            span[5].Should().Be(6);
+
+            writeStream.WriteByte(10);
+            writeStream.WriteByte(20);
+            writeStream.WriteByte(30);
+            writeStream.WriteByte(40);
+            writeStream.Flush();
+            span[0].Should().Be(10);
+            span[1].Should().Be(20);
+            span[2].Should().Be(30);
+            span[3].Should().Be(40);
         }
     }
 
