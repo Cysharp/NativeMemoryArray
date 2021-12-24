@@ -16,8 +16,9 @@ namespace Cysharp.Collections
     {
         public static readonly NativeMemoryArray<T> Empty;
 
-        internal readonly byte* buffer;
         readonly long length;
+        readonly bool addMemoryPressure;
+        internal readonly byte* buffer;
         bool isDisposed;
 
         public long Length => length;
@@ -28,11 +29,13 @@ namespace Cysharp.Collections
             Empty.Dispose();
         }
 
-        public NativeMemoryArray(long length, bool skipZeroClear = false)
+        public NativeMemoryArray(long length, bool skipZeroClear = false, bool addMemoryPressure = false)
         {
+            this.length = length;
+            this.addMemoryPressure = addMemoryPressure;
+
             if (length == 0)
             {
-                this.length = length;
 #if UNITY_2019_1_OR_NEWER
                 buffer = (byte*)Unsafe.AsPointer(ref Unsafe.AsRef<byte>(null));
 #else
@@ -42,7 +45,6 @@ namespace Cysharp.Collections
             else
             {
                 var allocSize = length * Unsafe.SizeOf<T>();
-                this.length = length;
 #if NET6_0_OR_GREATER
                 if (skipZeroClear)
                 {
@@ -62,7 +64,10 @@ namespace Cysharp.Collections
                     }
                 }
 #endif
-                GC.AddMemoryPressure(allocSize);
+                if (addMemoryPressure)
+                {
+                    GC.AddMemoryPressure(allocSize);
+                }
             }
         }
 
@@ -267,7 +272,10 @@ namespace Cysharp.Collections
 #else
                 Marshal.FreeHGlobal((IntPtr)buffer);
 #endif
-                GC.RemoveMemoryPressure(length * Unsafe.SizeOf<T>());
+                if (addMemoryPressure)
+                {
+                    GC.RemoveMemoryPressure(length * Unsafe.SizeOf<T>());
+                }
             }
         }
 

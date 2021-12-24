@@ -6,7 +6,14 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Cysharp.Collections;
 
-var z  = new NativeMemoryArray<int>(100);
+
+var yaki = new NativeMemoryArray<int>(100);
+var tako = new NativeMemoryArray<int>(100, skipZeroClear: true, addMemoryPressure: true);
+
+yaki.Dispose();
+tako.Dispose();
+
+var z = new NativeMemoryArray<int>(100);
 _ = z[-1];
 
 
