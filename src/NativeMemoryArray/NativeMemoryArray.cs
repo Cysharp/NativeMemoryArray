@@ -4,6 +4,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -90,7 +91,7 @@ namespace Cysharp.Collections
         public Span<T> AsSpan(long start, int length)
         {
             if ((ulong)(start + length) > (ulong)this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
-            return new Span<T>(buffer + start, length);
+            return new Span<T>(buffer + start * Unsafe.SizeOf<T>(), length);
         }
 
         public Memory<T> AsMemory()
@@ -107,8 +108,30 @@ namespace Cysharp.Collections
         public Memory<T> AsMemory(long start, int length)
         {
             if ((ulong)(start + length) > (ulong)(this.length)) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
-            return new PointerMemoryManager<T>(buffer + start, length).Memory;
+            return new PointerMemoryManager<T>(buffer + start * Unsafe.SizeOf<T>(), length).Memory;
         }
+
+        //public UnmanagedMemoryStream AsStream()
+        //{
+        //    return new UnmanagedMemoryStream(buffer, length * Unsafe.SizeOf<T>());
+        //}
+
+        //public UnmanagedMemoryStream AsStream(long offset)
+        //{
+
+
+        //    return new UnmanagedMemoryStream(buffer + offset * Unsafe.SizeOf<T>(), length * Unsafe.SizeOf<T>());
+        //}
+
+        //public UnmanagedMemoryStream AsStream()
+        //{
+        //    return new UnmanagedMemoryStream(buffer, length * Unsafe.SizeOf<T>());
+        //}
+
+        //public UnmanagedMemoryStream AsStream()
+        //{
+        //    return new UnmanagedMemoryStream(buffer, length * Unsafe.SizeOf<T>());
+        //}
 
         public ref T GetPinnableReference()
         {
@@ -369,7 +392,7 @@ namespace Cysharp.Collections
             var length = (int)Math.Min(int.MaxValue, nativeArray.Length - written);
 
             if (length == 0) return Array.Empty<T>();
-            return new Span<T>(nativeArray.buffer + written, length);
+            return new Span<T>(nativeArray.buffer + written * Unsafe.SizeOf<T>(), length);
         }
 
         public Memory<T> GetMemory(int sizeHint = 0)
@@ -381,11 +404,11 @@ namespace Cysharp.Collections
 
             if (pointerMemoryManager == null)
             {
-                pointerMemoryManager = new PointerMemoryManager<T>(nativeArray.buffer + written, length);
+                pointerMemoryManager = new PointerMemoryManager<T>(nativeArray.buffer + written * Unsafe.SizeOf<T>(), length);
             }
             else
             {
-                pointerMemoryManager.Reset(nativeArray.buffer + written, length);
+                pointerMemoryManager.Reset(nativeArray.buffer + written * Unsafe.SizeOf<T>(), length);
             }
 
             return pointerMemoryManager.Memory;

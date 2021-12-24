@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Runtime.CompilerServices;
 
 namespace Cysharp.Collections
 {
@@ -29,7 +30,8 @@ namespace Cysharp.Collections
 
         public override MemoryHandle Pin(int elementIndex = 0)
         {
-            return new MemoryHandle(pointer + elementIndex, default, this);
+            if ((uint)elementIndex >= (uint)length) ThrowHelper.ThrowIndexOutOfRangeException();
+            return new MemoryHandle(pointer + elementIndex * Unsafe.SizeOf<T>(), default, this);
         }
 
         public override void Unpin()
