@@ -135,6 +135,8 @@ The `ReadOnlySequence<T>` you can get with `AsReadOnlySequence()` can be passed 
 
 `AsMemoryList()` and `AsReadOnlySequence()` are convinient data structure for [RandomAccess](https://docs.microsoft.com/en-us/dotnet/api/system.io.randomaccess).`Read/Write` API.
 
+`AsStream()` convert to the [UnmanagedMemoryStream](https://docs.microsoft.com/en-us/dotnet/api/system.io.unmanagedmemorystream), if you want to do write operation, use `FileAccess.Write`.
+
 For the simple buffer processing, we provide some utility extension methods.
 
 ```csharp
