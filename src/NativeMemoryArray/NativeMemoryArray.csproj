@@ -24,6 +24,7 @@
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>../../opensource.snk</AssemblyOriginatorKeyFile>
 		<PackageIcon>Icon.png</PackageIcon>
+        <IsPackable>true</IsPackable>
 	</PropertyGroup>
 
 	<ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
