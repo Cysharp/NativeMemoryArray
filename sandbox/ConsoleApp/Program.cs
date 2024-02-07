@@ -1,10 +1,7 @@
-﻿using System;
+﻿using Cysharp.Collections;
+using System;
 using System.IO;
-using System.IO.Pipelines;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Cysharp.Collections;
 
 
 var yaki = new NativeMemoryArray<int>(100);
@@ -14,24 +11,13 @@ yaki.Dispose();
 tako.Dispose();
 
 var z = new NativeMemoryArray<int>(100);
-_ = z[-1];
+_ = z[0];
+//_ = z[-1]; // System.IndexOutOfRangeException: Index was outside the bounds of the array.
 
 
-using var bin1 = new NativeMemoryArray<byte>((long)int.MaxValue + 1024);
-using var bin2 = new NativeMemoryArray<byte>((long)int.MaxValue + 1024);
-
-var i = 0;
-foreach (var item in bin1)
-{
-    if (i++ == 0)
-    {
-        item.Fill(100);
-    }
-    else
-    {
-        item.Fill(200);
-    }
-}
+var bin1 = new NativeMemoryArray<byte>((long)int.MaxValue + 1024);
+var bin2 = new NativeMemoryArray<byte>((long)int.MaxValue + 1024);
+Fill(ref bin1);
 
 {
     using var handle = File.OpenHandle("foo.bin", FileMode.Create, FileAccess.Write, options: FileOptions.Asynchronous);
@@ -43,9 +29,28 @@ foreach (var item in bin1)
     await RandomAccess.ReadAsync(handle, bin2.AsMemoryList(), 0);
 }
 
-
 var a = bin1.AsReadOnlyMemoryList();
 var b = bin2.AsReadOnlyMemoryList();
 
 Console.WriteLine(a[0].Span.SequenceEqual(b[0].Span));
 Console.WriteLine(a[1].Span.SequenceEqual(b[1].Span));
+
+bin1.Dispose();
+bin2.Dispose();
+
+// allow use Span<T> in async context.
+static void Fill(ref NativeMemoryArray<byte> bin)
+{
+    var i = 0;
+    foreach (var item in bin)
+    {
+        if (i++ == 0)
+        {
+            item.Fill(100);
+        }
+        else
+        {
+            item.Fill(200);
+        }
+    }
+}
