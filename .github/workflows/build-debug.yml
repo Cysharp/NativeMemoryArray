@@ -61,3 +61,4 @@ jobs:
         with:
           name: NativeMemoryArray.Unity.unitypackage.zip
           path: ./src/NativeMemoryArray.Unity/*.unitypackage
+          retention-days: 1
