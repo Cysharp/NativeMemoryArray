@@ -57,7 +57,7 @@ jobs:
           directory: src/NativeMemoryArray.Unity
 
       # Store artifacts.
-      - uses: actions/upload-artifact@v2
+      - uses: Cysharp/Actions/.github/actions/upload-artifact@main
         with:
           name: NativeMemoryArray.Unity.unitypackage.zip
           path: ./src/NativeMemoryArray.Unity/*.unitypackage
