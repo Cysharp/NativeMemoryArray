@@ -140,6 +140,23 @@ namespace Cysharp.Collections
             return new UnmanagedMemoryStream(buffer + offset * Unsafe.SizeOf<T>(), len, len, fileAccess);
         }
 
+        public Stream AsStream(long offset, long length)
+        {
+            if ((ulong)offset > (ulong)this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(offset));
+            if (offset + length > this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
+
+            return new UnmanagedMemoryStream(buffer + offset * Unsafe.SizeOf<T>(), length * Unsafe.SizeOf<T>());
+        }
+
+        public Stream AsStream(long offset, long length, FileAccess fileAccess)
+        {
+            if ((ulong)offset > (ulong)this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(offset));
+            if (offset + length > this.length) ThrowHelper.ThrowArgumentOutOfRangeException(nameof(length));
+
+            var len = length * Unsafe.SizeOf<T>();
+            return new UnmanagedMemoryStream(buffer + offset * Unsafe.SizeOf<T>(), len, len, fileAccess);
+        }
+
         public ref T GetPinnableReference()
         {
             if (length == 0)
