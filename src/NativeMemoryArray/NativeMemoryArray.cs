@@ -20,6 +20,7 @@ namespace Cysharp.Collections
         readonly bool addMemoryPressure;
         internal readonly byte* buffer;
         bool isDisposed;
+        bool isStolen;
 
         public long Length => length;
 
@@ -170,6 +171,12 @@ namespace Cysharp.Collections
             return ref this[0];
         }
 
+        public byte* StealPointer()
+        {
+            isStolen = true;
+            return buffer;
+        }
+
         public bool TryGetFullSpan(out Span<T> span)
         {
             if (length < int.MaxValue)
@@ -275,7 +282,7 @@ namespace Cysharp.Collections
 
         void DisposeCore()
         {
-            if (!isDisposed)
+            if (!isDisposed && !isStolen)
             {
                 isDisposed = true;
 #if UNITY_2019_1_OR_NEWER
