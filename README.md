@@ -2,7 +2,7 @@ NativeMemoryArray
 ===
 [![GitHub Actions](https://github.com/Cysharp/NativeMemoryArray/workflows/Build-Debug/badge.svg)](https://github.com/Cysharp/NativeMemoryArray/actions) [![Releases](https://img.shields.io/github/release/Cysharp/NativeMemoryArray.svg)](https://github.com/Cysharp/NativeMemoryArray/releases)
 
-NativeMemoryArray is a native-memory backed array for .NET and Unity. The array size of C# is limited to maximum index of 0x7FFFFFC7(2,147,483,591), [Array.MaxLength](https://docs.microsoft.com/en-us/dotnet/api/system.array.maxlength). In terms of `bytes[]`, it is about 2GB. This is very cheep in the modern world. We handle the 4K/8K videos, large data set of deep-learning, huge 3D scan data of point cloud, etc.
+NativeMemoryArray is a native-memory backed array for .NET and Unity. The array size of C# is limited to maximum index of 0x7FFFFFC7(2,147,483,591), [Array.MaxLength](https://docs.microsoft.com/en-us/dotnet/api/system.array.maxlength). In terms of `bytes[]`, it is about 2GB. This is very cheap in the modern world. We handle the 4K/8K videos, large data set of deep-learning, huge 3D scan data of point cloud, etc.
 
 `NativeMemoryArray<T>` provides the native-memory backed array, it supports **infinity** length, `Span<T>` and `Memory<T>` slices, `IBufferWriter<T>`, `ReadOnlySeqeunce<T>` and .NET 6's new Scatter/Gather I/O API.
 
@@ -82,6 +82,7 @@ All `NativeMemoryArray<T>` APIs are as follows
 * `long Length`
 * `ref T this[long index]`
 * `ref T GetPinnableReference()`
+* `byte* StealPointer()`
 * `Span<T> AsSpan()`
 * `Span<T> AsSpan(long start)`
 * `Span<T> AsSpan(long start, int length)`
@@ -155,7 +156,7 @@ You can install via UPM git URL package or asset package(NativeMemoryArray.*.uni
 
 NativeMemoryArray requires `System.Memory.dll`, `System.Buffer.dll`, `System.Runtime.CompilerServices.Unsafe.dll`. It is not included in git URL so you need get from others or install via .unitypackage only once.
 
-The difference between `NativeArray<T>` and `NativeArray<T>` in Unity is that `NativeArray<T>` is a container for efficient interaction with the Unity Engine(C++) side. `NativeMemoryArray<T>` has a different role because it is for C# side only.
+The difference between `NativeArray<T>` and `NativeMemoryArray<T>` in Unity is that `NativeArray<T>` is a container for efficient interaction with the Unity Engine(C++) side. `NativeMemoryArray<T>` has a different role because it is for C# side only.
 
 License
 ---
