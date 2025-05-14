@@ -10,6 +10,8 @@ on:
 
 jobs:
   build-dotnet:
+    permissions:
+      contents: read
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -23,6 +25,8 @@ jobs:
     strategy:
       matrix:
         unity: ["2020.2.1f1"]
+    permissions:
+      contents: read
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
