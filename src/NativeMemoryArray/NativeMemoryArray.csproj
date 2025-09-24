@@ -1,53 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
-		<ImplicitUsings>disable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<LangVersion>9.0</LangVersion>
-		<RootNamespace>Cysharp.Collections</RootNamespace>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<NoWarn>1701;1702;1591</NoWarn>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
+    <RootNamespace>Cysharp.Collections</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
 
-		<!-- NuGet Packaging -->
-		<PackageVersion>$(Version)</PackageVersion>
-		<Company>Cysharp</Company>
-		<Authors>Cysharp</Authors>
-		<Copyright>© Cysharp, Inc.</Copyright>
-		<PackageTags>memory</PackageTags>
-		<Description>Utilized native-memory backed array for .NET and Unity.</Description>
-		<PackageProjectUrl>https://github.com/Cysharp/NativeMemoryArray</PackageProjectUrl>
-		<RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<SignAssembly>true</SignAssembly>
-		<AssemblyOriginatorKeyFile>../../opensource.snk</AssemblyOriginatorKeyFile>
-		<PackageIcon>Icon.png</PackageIcon>
-        <IsPackable>true</IsPackable>
-	</PropertyGroup>
+    <!-- NuGet Packaging -->
+    <Description>Utilized native-memory backed array for .NET and Unity.</Description>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
 
-	<ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
-		<PackageReference Include="System.Memory" Version="4.5.4" />
-	</ItemGroup>
+  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+    <PackageReference Include="System.Memory" Version="4.5.4" />
+  </ItemGroup>
 
-	<ItemGroup Condition="$(TargetFramework) != 'net6.0'">
-		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
-	</ItemGroup>
+  <ItemGroup Condition="$(TargetFramework) != 'net6.0'">
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<None Include="Icon.png" Pack="true" PackagePath="/" />
-	</ItemGroup>
+  <!-- Copy files for Unity -->
+  <PropertyGroup>
+    <DestinationRoot>$(MSBuildProjectDirectory)\..\NativeMemoryArray.Unity\Assets\Plugins\NativeMemoryArray\Runtime\</DestinationRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <TargetFiles1 Include="$(MSBuildProjectDirectory)\**\*.cs" Exclude="**\bin\**\*.*;**\obj\**\*.*;_InternalVisibleTo.cs" />
+  </ItemGroup>
 
-	<!-- Copy files for Unity -->
-	<PropertyGroup>
-		<DestinationRoot>$(MSBuildProjectDirectory)\..\NativeMemoryArray.Unity\Assets\Plugins\NativeMemoryArray\Runtime\</DestinationRoot>
-	</PropertyGroup>
-	<ItemGroup>
-		<TargetFiles1 Include="$(MSBuildProjectDirectory)\**\*.cs" Exclude="**\bin\**\*.*;**\obj\**\*.*;_InternalVisibleTo.cs" />
-	</ItemGroup>
-
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Copy SourceFiles="@(TargetFiles1)" DestinationFiles="$(DestinationRoot)\%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
-	</Target>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="@(TargetFiles1)" DestinationFiles="$(DestinationRoot)\%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>
