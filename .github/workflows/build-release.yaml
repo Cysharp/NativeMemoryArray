@@ -22,7 +22,6 @@ jobs:
       file-path: ./src/NativeMemoryArray.Unity/Assets/Plugins/NativeMemoryArray/package.json
       tag: ${{ inputs.tag }}
       dry-run: ${{ inputs.dry-run }}
-      push-tag: false
 
   build-dotnet:
     needs: [update-packagejson]
